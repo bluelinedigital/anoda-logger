@@ -37,7 +37,7 @@ export class AnodaLogger implements LoggerService {
         return context ? ` [ ${context} ] ${message} ${traceId}` : ` ${message} ${traceId}`;
     }
 
-    error (message: any, context?: string, ...optionalParameters: any[]): any {
+    error (message: any, context = 'Error', ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
 
@@ -50,7 +50,7 @@ export class AnodaLogger implements LoggerService {
         this.sendLog(message, context, traceId);
     }
 
-    log (message: any, context?: string, ...optionalParameters: any[]): any {
+    log (message: any, context = 'Info', ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
 
@@ -63,7 +63,7 @@ export class AnodaLogger implements LoggerService {
         this.sendLog(message, context, traceId);
     }
 
-    warn (message: any, context?: string, ...optionalParameters: any[]): any {
+    warn (message: any, context = 'Warn', ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
 
@@ -76,7 +76,7 @@ export class AnodaLogger implements LoggerService {
         this.sendLog(message, context, traceId);
     }
 
-    debug (message: any, context?: string, ...optionalParameters: any[]): any {
+    debug (message: any, context = 'Debug', ...optionalParameters: any[]): any {
 
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
