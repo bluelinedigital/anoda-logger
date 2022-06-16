@@ -42,7 +42,7 @@ export class AnodaLogger implements LoggerService {
     error (message: any, cont?: string, ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
-        const context = this.generalContext || cont;
+        const context = cont || this.generalContext;
 
         if (message instanceof Object) {
             pino.error({ ...message }, this.getMessage(message.msg, context, traceId));
@@ -56,7 +56,7 @@ export class AnodaLogger implements LoggerService {
     log (message: any, cont?: string, ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
-        const context = this.generalContext || cont;
+        const context = cont || this.generalContext;
 
         if (message instanceof Object) {
             pino.info({ ...message }, this.getMessage(message.msg, context, traceId));
@@ -70,7 +70,7 @@ export class AnodaLogger implements LoggerService {
     warn (message: any, cont?: string, ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
-        const context = this.generalContext || cont;
+        const context = cont || this.generalContext;
 
         if (message instanceof Object) {
             pino.warn({ ...message }, this.getMessage(message.msg, context, traceId));
@@ -85,7 +85,7 @@ export class AnodaLogger implements LoggerService {
 
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
-        const context = this.generalContext || cont;
+        const context = cont || this.generalContext;
 
 
         if (message instanceof Object) {
@@ -102,7 +102,7 @@ export class AnodaLogger implements LoggerService {
 
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
-        const context = this.generalContext || cont;
+        const context = cont || this.generalContext;
 
 
         if (message instanceof Object) {
