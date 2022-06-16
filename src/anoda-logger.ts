@@ -1,10 +1,10 @@
-import { LoggerService } from '@nestjs/common';
-import { pino as pinoLogger } from 'pino';
-import { asyncLocalStorage } from './async-storage';
+import {LoggerService} from '@nestjs/common';
+import {pino as pinoLogger} from 'pino';
+import {asyncLocalStorage} from './async-storage';
 import axios from 'axios';
-import { LogObj } from './interfaces';
-import { setTimeout } from 'node:timers';
-import { AnodaConfig } from './logger-config';
+import {ELevel, LogObj} from './interfaces';
+import {setTimeout} from 'node:timers';
+import {AnodaConfig} from './logger-config';
 
 
 const pino = pinoLogger({
@@ -19,15 +19,17 @@ export class AnodaLogger implements LoggerService {
     private appName: string;
     private loggerUri: string;
     private loggerKey: string;
+    private generalContext: string;
 
 
-    constructor () {
+    constructor (context?: string) {
         this.logData = [];
         this.isRunning = false;
         this.env = AnodaConfig.env;
         this.appName = AnodaConfig.appName;
         this.loggerUri = AnodaConfig.loggerUri;
         this.loggerKey = AnodaConfig.loggerKey;
+        this.generalContext = context;
     }
 
     private getMessage (message: any, context?: string, traceId = 'System message') {
@@ -37,9 +39,10 @@ export class AnodaLogger implements LoggerService {
         return context ? ` [ ${context} ] ${message} ${traceId}` : ` ${message} ${traceId}`;
     }
 
-    error (message: any, context = 'Error', ...optionalParameters: any[]): any {
+    error (message: any, cont?: string, ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
+        const context = this.generalContext || cont;
 
         if (message instanceof Object) {
             pino.error({ ...message }, this.getMessage(message.msg, context, traceId));
@@ -47,12 +50,13 @@ export class AnodaLogger implements LoggerService {
         else {
             pino.error(this.getMessage(message, context, traceId));
         }
-        this.sendLog(message, context, traceId);
+        this.sendLog(message, context, traceId, ELevel.ERROR);
     }
 
-    log (message: any, context = 'Info', ...optionalParameters: any[]): any {
+    log (message: any, cont?: string, ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
+        const context = this.generalContext || cont;
 
         if (message instanceof Object) {
             pino.info({ ...message }, this.getMessage(message.msg, context, traceId));
@@ -60,12 +64,13 @@ export class AnodaLogger implements LoggerService {
         else {
             pino.info(this.getMessage(message, context, traceId));
         }
-        this.sendLog(message, context, traceId);
+        this.sendLog(message, context, traceId, ELevel.INFO);
     }
 
-    warn (message: any, context = 'Warn', ...optionalParameters: any[]): any {
+    warn (message: any, cont?: string, ...optionalParameters: any[]): any {
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
+        const context = this.generalContext || cont;
 
         if (message instanceof Object) {
             pino.warn({ ...message }, this.getMessage(message.msg, context, traceId));
@@ -73,13 +78,14 @@ export class AnodaLogger implements LoggerService {
         else {
             pino.warn(this.getMessage(message, context, traceId));
         }
-        this.sendLog(message, context, traceId);
+        this.sendLog(message, context, traceId, ELevel.WARN);
     }
 
-    debug (message: any, context = 'Debug', ...optionalParameters: any[]): any {
+    debug (message: any, cont?: string, ...optionalParameters: any[]): any {
 
         // @ts-ignore
         const traceId = asyncLocalStorage.getStore()?.get('traceId');
+        const context = this.generalContext || cont;
 
 
         if (message instanceof Object) {
@@ -89,10 +95,27 @@ export class AnodaLogger implements LoggerService {
             pino.debug(this.getMessage(message, context, traceId));
         }
 
-        this.sendLog(message, context, traceId);
+        this.sendLog(message, context, traceId, ELevel.DEBUG);
     }
 
-    private sendLog (message: string | object, context: string, traceId: string) {
+    fatal (message: any, cont?: string, ...optionalParameters: any[]): any {
+
+        // @ts-ignore
+        const traceId = asyncLocalStorage.getStore()?.get('traceId');
+        const context = this.generalContext || cont;
+
+
+        if (message instanceof Object) {
+            pino.fatal({ ...message }, this.getMessage(message.msg, context, traceId));
+        }
+        else {
+            pino.fatal(this.getMessage(message, context, traceId));
+        }
+
+        this.sendLog(message, context, traceId, ELevel.FATAL);
+    }
+
+    private sendLog (message: string | object, context: string, traceId: string, level: ELevel) {
         if (message instanceof Object) {
             message = message.toString();
         }
@@ -103,6 +126,7 @@ export class AnodaLogger implements LoggerService {
             message,
             traceId,
             env:       this.env,
+            level,
         });
 
         if (this.isRunning) {
